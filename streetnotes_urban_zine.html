@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>streetnotes.space — Gritty Urban Archive</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Space Grotesk & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300..800;1,300..800&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Space Grotesk"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        asphalt: '#0c0c0c',
+                        cardbg: '#141414',
+                        concrete: '#262626',
+                        zincborder: '#333333',
+                        neonorange: '#ff5722',
+                        neonyellow: '#ccff00',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0c0c0c;
+            color: #f5f5f5;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .brutal-shadow {
+            box-shadow: 4px 4px 0px #ff5722;
+        }
+        .brutal-shadow-white {
+            box-shadow: 4px 4px 0px #f5f5f5;
+        }
+        .brutal-shadow-hover:hover {
+            box-shadow: 6px 6px 0px #ff5722;
+            transform: translate(-2px, -2px);
+            transition: all 0.15s ease;
+        }
+        /* Receipt jagged edge */
+        .receipt-edge {
+            background: radial-gradient(circle, transparent, transparent 50%, #141414 50%, #141414 100%), #141414;
+            background-size: 10px 10px;
+        }
+        /* Grunge asphalt noise overlay */
+        .asphalt-noise {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0c0c0c;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ff5722;
+            border-radius: 0px;
+        }
+    </style>
+</head>
+<body class="min-h-full flex flex-col asphalt-noise selection:bg-neonorange selection:text-white">
+
+    <!-- Top Ticker Bar -->
+    <div class="bg-neonorange text-asphalt font-mono text-xs font-bold py-1.5 px-4 overflow-hidden whitespace-nowrap uppercase tracking-widest border-b border-asphalt">
+        <div class="inline-block animate-marquee">
+            ⚡ LIVE URBAN ARCHIVE // GLOBAL STREET TRUTHS // NO RULES JUST SCRIBBLINGS // SUBMIT YOUR CITY WHISPERS //
+        </div>
+    </div>
+
+    <!-- Sticky Brutalist Header -->
+    <header class="sticky top-0 z-40 bg-asphalt/95 backdrop-blur-md border-b-2 border-zincborder px-4 sm:px-8 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <!-- Brand -->
+            <a href="#" class="group flex items-center gap-2">
+                <span class="font-mono font-extrabold text-2xl sm:text-3xl tracking-tighter text-white group-hover:text-neonorange transition-colors">
+                    street<span class="text-neonorange group-hover:text-white">notes</span>.space
+                </span>
+                <span class="text-[10px] font-mono uppercase bg-concrete text-neonyellow px-2 py-0.5 border border-zincborder hidden sm:inline-block">
+                    v2.0-RAW
+                </span>
+            </a>
+
+            <!-- Search Bar (Desktop) -->
+            <div class="hidden md:flex items-center gap-2 bg-cardbg border-2 border-zincborder px-3 py-1.5 w-72 focus-within:border-neonorange transition-colors">
+                <i data-lucide="terminal" class="w-4 h-4 text-neonorange"></i>
+                <input type="text" id="searchInput" placeholder="Search city, notes, tags..." class="bg-transparent text-sm focus:outline-none w-full text-white placeholder:text-zinc-500 font-mono">
+            </div>
+
+            <!-- Actions: Auth & Drop Note -->
+            <div class="flex items-center gap-3">
+                <button onclick="openPostModal()" class="flex items-center gap-2 bg-neonorange text-asphalt px-4 py-2 font-mono font-bold text-xs sm:text-sm brutal-shadow brutal-shadow-hover transition-all uppercase">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    <span>Drop Note</span>
+                </button>
+
+                <div id="authSection" class="flex items-center gap-2">
+                    <!-- Dynamic Auth -->
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Search -->
+    <div class="md:hidden px-4 py-3 bg-asphalt border-b border-zincborder">
+        <div class="flex items-center gap-2 bg-cardbg border-2 border-zincborder px-3 py-2 w-full">
+            <i data-lucide="terminal" class="w-4 h-4 text-neonorange"></i>
+            <input type="text" id="mobileSearchInput" placeholder="Search city, notes..." class="bg-transparent text-sm focus:outline-none w-full text-white placeholder:text-zinc-500 font-mono">
+        </div>
+    </div>
+
+    <!-- Hero Intro -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-8 pt-10 pb-6">
+        <div class="border-l-4 border-neonorange pl-4 sm:pl-6 py-2">
+            <h1 class="font-sans font-extrabold text-3xl sm:text-5xl tracking-tight text-white uppercase mb-2">
+                Concrete <span class="text-transparent bg-clip-text bg-gradient-to-r from-neonorange to-neonyellow">Confessions</span>
+            </h1>
+            <p class="text-zinc-400 font-mono text-xs sm:text-sm max-w-2xl">
+                An uncensored global collection of street poetry, bathroom stall manifestos, electrical box graffiti, and asphalt ephemera.
+            </p>
+        </div>
+
+        <!-- City Filter Pills -->
+        <div id="cityFilters" class="flex items-center gap-2 overflow-x-auto py-4 mt-4 no-scrollbar">
+            <!-- Dynamic Cities -->
+        </div>
+    </section>
+
+    <!-- Main Masonry Grid Feed -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-8 py-4 w-full">
+        <div id="feedGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Rendered via JS -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-24 border-2 border-dashed border-zincborder bg-cardbg my-8">
+            <i data-lucide="alert-octagon" class="w-12 h-12 text-neonorange mx-auto mb-3"></i>
+            <h3 class="font-mono text-lg text-white mb-1 uppercase tracking-wider">No Whispers Found</h3>
+            <p class="text-zinc-500 font-mono text-xs">Be the first wanderer to tag this street corner.</p>
+        </div>
+    </main>
+
+    <!-- Brutalist Footer -->
+    <footer class="border-t-2 border-zincborder bg-asphalt py-8 px-4 sm:px-8 mt-16 font-mono text-xs text-zinc-500">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p>© 2026 streetnotes.space // RAW URBAN ARCHIVE</p>
+            <div class="flex items-center gap-6">
+                <span class="text-neonorange">STATUS: ONLINE</span>
+                <a href="#" class="hover:text-white transition-colors">API</a>
+                <a href="#" class="hover:text-white transition-colors">MANIFESTO</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- Auth Modal -->
+    <div id="authModal" class="fixed inset-0 z-50 bg-asphalt/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="bg-cardbg border-2 border-zincborder w-full max-w-md p-6 sm:p-8 brutal-shadow-white relative">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 p-2 text-zinc-400 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="mb-6 font-mono">
+                <span class="bg-neonorange text-asphalt text-[10px] px-2 py-0.5 uppercase font-bold">Secure Terminal</span>
+                <h2 id="authModalTitle" class="text-2xl font-bold text-white uppercase mt-2 tracking-wide">Access Archive</h2>
+                <p id="authModalSubtitle" class="text-xs text-zinc-400 mt-1">Sign in to drop your street notes globally.</p>
+            </div>
+
+            <form id="authForm" onsubmit="handleAuthSubmit(event)" class="space-y-4 font-mono text-sm">
+                <div id="usernameFieldGroup" class="hidden">
+                    <label class="block text-xs uppercase text-zinc-400 mb-1">Handle / Alias</label>
+                    <input type="text" id="authUsername" placeholder="@urban_ghost" class="w-full bg-asphalt border-2 border-zincborder p-3 text-white focus:outline-none focus:border-neonorange">
+                </div>
+                <div>
+                    <label class="block text-xs uppercase text-zinc-400 mb-1">Email</label>
+                    <input type="email" id="authEmail" required placeholder="wanderer@streetnotes.space" class="w-full bg-asphalt border-2 border-zincborder p-3 text-white focus:outline-none focus:border-neonorange">
+                </div>
+                <div>
+                    <label class="block text-xs uppercase text-zinc-400 mb-1">Password</label>
+                    <input type="password" id="authPassword" required placeholder="••••••••" class="w-full bg-asphalt border-2 border-zincborder p-3 text-white focus:outline-none focus:border-neonorange">
+                </div>
+                <button type="submit" id="authSubmitBtn" class="w-full bg-neonorange text-asphalt py-3 font-bold uppercase tracking-wider brutal-shadow hover:translate-y-[-1px] transition-all">
+                    Initialize Session
+                </button>
+            </form>
+
+            <div class="mt-6 text-center font-mono text-xs text-zinc-400">
+                <p id="authToggleText">No alias yet? <button type="button" onclick="toggleAuthMode()" class="text-neonorange font-bold underline">Create profile</button></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Drop Note Modal -->
+    <div id="postModal" class="fixed inset-0 z-50 bg-asphalt/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="bg-cardbg border-2 border-zincborder w-full max-w-lg p-6 sm:p-8 brutal-shadow relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closePostModal()" class="absolute top-4 right-4 p-2 text-zinc-400 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="mb-6 font-mono">
+                <span class="bg-neonyellow text-asphalt text-[10px] px-2 py-0.5 uppercase font-bold">New Transmission</span>
+                <h2 class="text-2xl font-bold text-white uppercase mt-2">Drop Street Note</h2>
+                <p class="text-xs text-zinc-400 mt-1">Capture what you saw on the pavement today.</p>
+            </div>
+
+            <form id="postForm" onsubmit="handlePostSubmit(event)" class="space-y-4 font-mono text-sm">
+                <!-- Card Style Selector -->
+                <div>
+                    <label class="block text-xs uppercase text-zinc-400 mb-2">Card Style Template</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <label class="cursor-pointer border-2 border-zincborder p-3 text-center bg-asphalt hover:border-neonorange transition-all has-[:checked]:border-neonorange has-[:checked]:bg-neonorange/10">
+                            <input type="radio" name="cardStyle" value="receipt" checked class="hidden">
+                            <span class="text-xs font-bold block text-white">RECEIPT</span>
+                        </label>
+                        <label class="cursor-pointer border-2 border-zincborder p-3 text-center bg-asphalt hover:border-neonorange transition-all has-[:checked]:border-neonorange has-[:checked]:bg-neonorange/10">
+                            <input type="radio" name="cardStyle" value="spray" class="hidden">
+                            <span class="text-xs font-bold block text-white">SPRAY TAG</span>
+                        </label>
+                        <label class="cursor-pointer border-2 border-zincborder p-3 text-center bg-asphalt hover:border-neonorange transition-all has-[:checked]:border-neonorange has-[:checked]:bg-neonorange/10">
+                            <input type="radio" name="cardStyle" value="sticky" class="hidden">
+                            <span class="text-xs font-bold block text-white">STICKY NOTE</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Image Upload -->
+                <div>
+                    <label class="block text-xs uppercase text-zinc-400 mb-1">Urban Photo / Snapshot</label>
+                    <div class="border-2 border-dashed border-zincborder bg-asphalt p-4 text-center cursor-pointer hover:border-neonorange transition-colors relative">
+                        <input type="file" id="noteImageFile" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="handleImagePreview(event)">
+                        <div id="dropZoneContent">
+                            <i data-lucide="camera" class="w-6 h-6 mx-auto text-neonorange mb-1"></i>
+                            <p class="text-xs text-zinc-400">Upload photo (or use default urban texture)</p>
+                        </div>
+                        <div id="imagePreviewContainer" class="hidden relative">
+                            <img id="imagePreview" src="" alt="Preview" class="max-h-36 mx-auto border border-zincborder object-cover">
+                            <button type="button" onclick="clearImagePreview(event)" class="absolute top-1 right-1 bg-asphalt text-white px-2 py-0.5 text-xs">REMOVE</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Text Content -->
+                <div>
+                    <label class="block text-xs uppercase text-zinc-400 mb-1">Street Writing / Scribble</label>
+                    <textarea id="noteContent" required rows="3" placeholder="e.g., 'Lost in the signals, found in the concrete.'" class="w-full bg-asphalt border-2 border-zincborder p-3 text-white focus:outline-none focus:border-neonorange font-sans text-base"></textarea>
+                </div>
+
+                <!-- City Select -->
+                <div>
+                    <label class="block text-xs uppercase text-zinc-400 mb-1">City Location</label>
+                    <select id="noteCity" class="w-full bg-asphalt border-2 border-zincborder p-3 text-white focus:outline-none focus:border-neonorange">
+                        <option value="NYC, US">New York (NYC, US)</option>
+                        <option value="London, UK">London (London, UK)</option>
+                        <option value="Tokyo, JP">Tokyo (Tokyo, JP)</option>
+                        <option value="Berlin, DE">Berlin (Berlin, DE)</option>
+                        <option value="Jakarta, ID">Jakarta (Jakarta, ID)</option>
+                        <option value="Paris, FR">Paris (Paris, FR)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="w-full bg-neonorange text-asphalt py-3 font-bold uppercase tracking-wider brutal-shadow hover:translate-y-[-1px] transition-all">
+                    Broadcast to Archive
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-neonyellow text-asphalt px-4 py-3 font-mono text-xs font-bold brutal-shadow transform translate-y-20 opacity-0 transition-all duration-300">
+        Notification
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        const DEFAULT_POSTS = [
+            {
+                id: 'note-1',
+                style: 'receipt',
+                image: 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=800&q=80',
+                content: '“Stay wild in the concrete maze.”',
+                city: 'Tokyo, JP',
+                author: '@kenji_ Shibuya',
+                likes: 48,
+                likedByMe: false,
+                timestamp: Date.now() - 3600000 * 2
+            },
+            {
+                id: 'note-2',
+                style: 'spray',
+                image: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=800&q=80',
+                content: '“NO FUTURE WITHOUT SUBVERSIVE ART.”',
+                city: 'NYC, US',
+                author: '@soho_phantom',
+                likes: 92,
+                likedByMe: true,
+                timestamp: Date.now() - 3600000 * 8
+            },
+            {
+                id: 'note-3',
+                style: 'sticky',
+                image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800&q=80',
+                content: '“Drink coffee, break rules, call your mother.”',
+                city: 'Paris, FR',
+                author: '@claire_paris',
+                likes: 64,
+                likedByMe: false,
+                timestamp: Date.now() - 3600000 * 15
+            },
+            {
+                id: 'note-4',
+                style: 'receipt',
+                image: 'https://images.unsplash.com/photo-1555899646-170f5ed6cf50?auto=format&fit=crop&w=800&q=80',
+                content: '“Hujan sore ini membawa rindu yang tertinggal di trotoar.”',
+                city: 'Jakarta, ID',
+                author: '@fajar_cikini',
+                likes: 37,
+                likedByMe: false,
+                timestamp: Date.now() - 3600000 * 24
+            },
+            {
+                id: 'note-5',
+                style: 'spray',
+                image: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=800&q=80',
+                content: '“WE ARE THE GHOSTS OF THE UNDERGROUND.”',
+                city: 'London, UK',
+                author: '@camden_rebel',
+                likes: 118,
+                likedByMe: true,
+                timestamp: Date.now() - 3600000 * 30
+            },
+            {
+                id: 'note-6',
+                style: 'sticky',
+                image: 'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=800&q=80',
+                content: '“Kreuzberg remembers everything.”',
+                city: 'Berlin, DE',
+                author: '@berlin_wall_03',
+                likes: 81,
+                likedByMe: false,
+                timestamp: Date.now() - 3600000 * 42
+            }
+        ];
+
+        let posts = JSON.parse(localStorage.getItem('streetnotes_raw_posts')) || DEFAULT_POSTS;
+        let currentUser = JSON.parse(localStorage.getItem('streetnotes_raw_user')) || null;
+        let activeCity = 'ALL';
+        let searchQuery = '';
+        let isSignUp = false;
+        let uploadedBase64 = '';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderAuthSection();
+            renderCityFilters();
+            renderFeed();
+            lucide.createIcons();
+
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                searchQuery = e.target.value.toLowerCase();
+                renderFeed();
+            });
+            document.getElementById('mobileSearchInput').addEventListener('input', (e) => {
+                searchQuery = e.target.value.toLowerCase();
+                renderFeed();
+            });
+        });
+
+        // Auth Render & Handlers
+        function renderAuthSection() {
+            const container = document.getElementById('authSection');
+            if (currentUser) {
+                container.innerHTML = `
+                    <div class="flex items-center gap-2 bg-cardbg border-2 border-zincborder px-3 py-1.5 font-mono text-xs">
+                        <span class="w-2 h-2 rounded-full bg-neonyellow animate-pulse"></span>
+                        <span class="text-white font-bold">${currentUser.username}</span>
+                        <button onclick="logout()" class="text-zinc-400 hover:text-neonorange ml-2" title="Logout">
+                            <i data-lucide="log-out" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <button onclick="openAuthModal('signin')" class="font-mono text-xs uppercase tracking-wider text-white px-3 py-2 border-2 border-zincborder hover:border-neonorange transition-colors">
+                        Sign In
+                    </button>
+                `;
+            }
+            lucide.createIcons();
+        }
+
+        function openAuthModal(mode = 'signin') {
+            isSignUp = (mode === 'signup');
+            const modal = document.getElementById('authModal');
+            const title = document.getElementById('authModalTitle');
+            const subtitle = document.getElementById('authModalSubtitle');
+            const userGroup = document.getElementById('usernameFieldGroup');
+            const submitBtn = document.getElementById('authSubmitBtn');
+            const toggleText = document.getElementById('authToggleText');
+
+            if (isSignUp) {
+                title.textContent = "Register Alias";
+                subtitle.textContent = "Join the global urban network.";
+                userGroup.classList.remove('hidden');
+                submitBtn.textContent = "Create Profile";
+                toggleText.innerHTML = `Already have alias? <button type="button" onclick="toggleAuthMode()" class="text-neonorange font-bold underline">Sign In</button>`;
+            } else {
+                title.textContent = "Access Archive";
+                subtitle.textContent = "Sign in to drop your street notes.";
+                userGroup.classList.add('hidden');
+                submitBtn.textContent = "Initialize Session";
+                toggleText.innerHTML = `No alias yet? <button type="button" onclick="toggleAuthMode()" class="text-neonorange font-bold underline">Create profile</button>`;
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.add('hidden');
+        }
+
+        function toggleAuthMode() {
+            isSignUp = !isSignUp;
+            openAuthModal(isSignUp ? 'signup' : 'signin');
+        }
+
+        function handleAuthSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('authEmail').value;
+            const usernameInput = document.getElementById('authUsername').value;
+            const username = isSignUp ? (usernameInput.startsWith('@') ? usernameInput : '@' + (usernameInput || email.split('@')[0])) : '@' + email.split('@')[0];
+
+            currentUser = { email, username };
+            localStorage.setItem('streetnotes_raw_user', JSON.stringify(currentUser));
+            closeAuthModal();
+            renderAuthSection();
+            showToast(`SESSION ACTIVE: ${username}`);
+            document.getElementById('authForm').reset();
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('streetnotes_raw_user');
+            renderAuthSection();
+            showToast('SESSION TERMINATED');
+        }
+
+        // Post Modal & Submission
+        function openPostModal() {
+            if (!currentUser) {
+                showToast('ACCESS DENIED: SIGN IN REQUIRED');
+                openAuthModal('signin');
+                return;
+            }
+            document.getElementById('postModal').classList.remove('hidden');
+        }
+
+        function closePostModal() {
+            document.getElementById('postModal').classList.add('hidden');
+            document.getElementById('postForm').reset();
+            clearImagePreview();
+        }
+
+        function handleImagePreview(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    uploadedBase64 = evt.target.result;
+                    document.getElementById('imagePreview').src = uploadedBase64;
+                    document.getElementById('dropZoneContent').classList.add('hidden');
+                    document.getElementById('imagePreviewContainer').classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function clearImagePreview(e) {
+            if (e) e.stopPropagation();
+            uploadedBase64 = '';
+            document.getElementById('noteImageFile').value = '';
+            document.getElementById('imagePreviewContainer').classList.add('hidden');
+            document.getElementById('dropZoneContent').classList.remove('hidden');
+        }
+
+        function handlePostSubmit(e) {
+            e.preventDefault();
+            const content = document.getElementById('noteContent').value;
+            const city = document.getElementById('noteCity').value;
+            const style = document.querySelector('input[name="cardStyle"]:checked').value;
+            const image = uploadedBase64 || 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80';
+
+            const newPost = {
+                id: 'note-' + Date.now(),
+                style,
+                image,
+                content,
+                city,
+                author: currentUser.username,
+                likes: 0,
+                likedByMe: false,
+                timestamp: Date.now()
+            };
+
+            posts.unshift(newPost);
+            localStorage.setItem('streetnotes_raw_posts', JSON.stringify(posts));
+            closePostModal();
+            renderCityFilters();
+            renderFeed();
+            showToast('TRANSMISSION SUCCESSFUL');
+        }
+
+        // Feed & Filtering
+        function renderCityFilters() {
+            const container = document.getElementById('cityFilters');
+            const cities = ['ALL', ...new Set(posts.map(p => p.city))];
+
+            container.innerHTML = cities.map(city => `
+                <button onclick="setCityFilter('${city}')" class="px-4 py-2 font-mono text-xs uppercase tracking-wider border-2 transition-all whitespace-nowrap ${activeCity === city ? 'bg-neonorange text-asphalt border-neonorange font-bold' : 'bg-cardbg text-zinc-300 border-zincborder hover:border-white'}">
+                    ${city}
+                </button>
+            `).join('');
+        }
+
+        function setCityFilter(city) {
+            activeCity = city;
+            renderCityFilters();
+            renderFeed();
+        }
+
+        function renderFeed() {
+            const grid = document.getElementById('feedGrid');
+            const emptyState = document.getElementById('emptyState');
+
+            let filtered = posts.filter(post => {
+                const matchCity = (activeCity === 'ALL' || post.city === activeCity);
+                const matchSearch = post.content.toLowerCase().includes(searchQuery) ||
+                                      post.city.toLowerCase().includes(searchQuery) ||
+                                      post.author.toLowerCase().includes(searchQuery);
+                return matchCity && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            grid.innerHTML = filtered.map(post => {
+                let cardDecorator = '';
+                if (post.style === 'receipt') {
+                    cardDecorator = `<div class="bg-cardbg border-2 border-zincborder p-5 brutal-shadow relative">
+                        <div class="text-center font-mono text-[10px] text-zinc-500 uppercase tracking-widest border-b border-dashed border-zincborder pb-2 mb-3">
+                            RECEIPT // RECORD #${post.id.slice(-4)}
+                        </div>`;
+                } else if (post.style === 'spray') {
+                    cardDecorator = `<div class="bg-cardbg border-2 border-neonorange p-5 brutal-shadow relative">
+                        <div class="absolute -top-3 left-4 bg-neonorange text-asphalt font-mono text-[9px] uppercase px-2 font-extrabold">
+                            SPRAY TAG
+                        </div>`;
+                } else {
+                    cardDecorator = `<div class="bg-cardbg border-2 border-neonyellow p-5 brutal-shadow relative">
+                        <div class="absolute -top-3 left-4 bg-neonyellow text-asphalt font-mono text-[9px] uppercase px-2 font-extrabold">
+                            STICKY NOTE
+                        </div>`;
+                }
+
+                return `
+                    <article class="flex flex-col justify-between">
+                        ${cardDecorator}
+                            <!-- Meta Header -->
+                            <div class="flex items-center justify-between mb-3 font-mono text-xs text-zinc-400">
+                                <span class="bg-asphalt px-2 py-0.5 border border-zincborder text-white">
+                                    📍 ${post.city}
+                                </span>
+                                <span>${timeAgo(post.timestamp)}</span>
+                            </div>
+
+                            <!-- Photo -->
+                            <div class="aspect-[4/3] bg-asphalt border border-zincborder overflow-hidden mb-4 relative">
+                                <img src="${post.image}" alt="Urban street note" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" onerror="this.src='https://placehold.co/600x400/141414/ff5722?text=streetnotes'">
+                                <div class="absolute bottom-2 left-2 bg-asphalt/90 text-zinc-300 font-mono text-[10px] px-2 py-0.5 border border-zincborder">
+                                    ${post.author}
+                                </div>
+                            </div>
+
+                            <!-- Content -->
+                            <p class="font-sans font-bold text-lg text-white mb-4 leading-snug">
+                                ${post.content}
+                            </p>
+                        </div>
+
+                        <!-- Footer Bar -->
+                        <div class="mt-2 bg-asphalt border-2 border-zincborder p-3 flex items-center justify-between font-mono text-xs">
+                            <span class="text-zinc-500">${post.author}</span>
+                            <button onclick="toggleLike('${post.id}')" class="flex items-center gap-1.5 px-3 py-1 border-2 transition-all ${post.likedByMe ? 'bg-neonorange text-asphalt border-neonorange font-bold' : 'bg-cardbg text-white border-zincborder hover:border-white'}">
+                                <i data-lucide="heart" class="w-3.5 h-3.5 ${post.likedByMe ? 'fill-asphalt' : ''}"></i>
+                                <span>${post.likes}</span>
+                            </button>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        function toggleLike(postId) {
+            const post = posts.find(p => p.id === postId);
+            if (post) {
+                if (post.likedByMe) {
+                    post.likes -= 1;
+                    post.likedByMe = false;
+                } else {
+                    post.likes += 1;
+                    post.likedByMe = true;
+                }
+                localStorage.setItem('streetnotes_raw_posts', JSON.stringify(posts));
+                renderFeed();
+            }
+        }
+
+        function timeAgo(timestamp) {
+            const secs = Math.floor((Date.now() - timestamp) / 1000);
+            if (secs < 60) return 'Just now';
+            const mins = Math.floor(secs / 60);
+            if (mins < 60) return `${mins}m ago`;
+            const hours = Math.floor(mins / 60);
+            if (hours < 24) return `${hours}h ago`;
+            const days = Math.floor(hours / 24);
+            return `${days}d ago`;
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                t.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
+```
+@@eof
