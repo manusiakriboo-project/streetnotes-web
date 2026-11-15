@@ -12,6 +12,8 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,600;0,800;1,400&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -51,7 +53,6 @@
       background-size: 12px 12px;
       background-repeat: repeat-x;
     }
-    /* Custom scrollbar */
     ::-webkit-scrollbar { width: 8px; }
     ::-webkit-scrollbar-track { background: #0c0c0c; }
     ::-webkit-scrollbar-thumb { background: #262626; }
@@ -62,15 +63,14 @@
 
   <!-- Top Ticker Bar -->
   <div class="bg-hazard text-black text-xs font-bold py-1.5 px-4 border-b-2 border-black flex justify-between items-center tracking-wider uppercase">
-    <span>● LIVE ARCHIVE // STREETNOTES.ONLINE</span>
+    <span>● LIVE CLOUD ARCHIVE // STREETNOTES.ONLINE</span>
     <span class="hidden sm:inline">WORLDWIDE SIDEWALK & WALL DOCUMENTATION</span>
-    <span id="post-counter">000 ENTRIES</span>
+    <span id="post-counter">SYNCING...</span>
   </div>
 
   <!-- Navbar -->
   <header class="sticky top-0 z-40 bg-asphalt/95 backdrop-blur border-b-2 border-concrete">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-      <!-- Brand -->
       <a href="#" onclick="resetFilters()" class="flex items-center gap-2.5 group">
         <div class="w-8 h-8 bg-hazard text-black font-sans font-bold flex items-center justify-center text-lg border border-black group-hover:rotate-6 transition-transform">
           SN
@@ -80,14 +80,12 @@
         </div>
       </a>
 
-      <!-- Actions -->
       <div class="flex items-center gap-2 sm:gap-3">
         <button onclick="handleOpenSubmit()" class="bg-hazard hover:bg-orange-600 text-black font-bold text-xs sm:text-sm px-3 sm:px-4 py-2 border border-black uppercase tracking-wider flex items-center gap-1.5 transition-transform active:translate-y-0.5">
           <i data-lucide="plus-square" class="w-4 h-4"></i>
           <span>Submit Note</span>
         </button>
 
-        <!-- Auth State Container -->
         <div id="auth-controls" class="flex items-center gap-2"></div>
       </div>
     </div>
@@ -97,9 +95,44 @@
   <section class="border-b-2 border-concrete bg-cardbg/60">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
       <div class="max-w-2xl">
-        <p class="text-hazard text-xs uppercase tracking-widest mb-2">[ ANONYMOUS URBAN FIELD NOTES ]</p>
+        <p class="text-hazard text-xs uppercase tracking-widest mb-2">[ GLOBAL URBAN FIELD NOTES ]</p>
         <h1 class="font-sans font-bold text-3xl sm:text-5xl text-white uppercase leading-none tracking-tight mb-3">
           Found on walls, poles &amp; pavements.
         </h1>
         <p class="text-neutral-400 text-xs sm:text-sm leading-relaxed">
-          A global crowd-sourced zine of stray street writing, torn receipts, stickers, and accidental
+          A worldwide crowd-sourced zine of stray street writing, torn receipts, stickers, and accidental poetry. Mint an archivist handle to drop your finds.
+        </p>
+      </div>
+
+      <!-- Search & City Filter Bar -->
+      <div class="mt-6 pt-6 border-t border-concrete flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center">
+        <div id="city-filters" class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0"></div>
+        <div class="relative sm:w-64">
+          <i data-lucide="search" class="w-4 h-4 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2"></i>
+          <input type="text" id="search-input" oninput="renderFeed()" placeholder="Search text, city, @user..."
+            class="w-full bg-asphalt border border-concrete focus:border-hazard outline-none text-xs text-white pl-9 pr-3 py-2 placeholder:text-neutral-600" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Feed Grid -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8">
+    <!-- Loading State -->
+    <div id="loading-state" class="py-20 text-center">
+      <div class="inline-block px-4 py-2 border border-hazard text-hazard text-xs uppercase tracking-widest animate-pulse">
+        CONNECTING TO GLOBAL ARCHIVE...
+      </div>
+    </div>
+
+    <div id="feed-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+    <!-- Clean Empty State -->
+    <div id="empty-state" class="hidden py-20 text-center border-2 border-dashed border-concrete bg-cardbg/40 px-4">
+      <div class="inline-flex items-center justify-center w-12 h-12 bg-concrete text-hazard mb-4">
+        <i data-lucide="camera" class="w-6 h-6"></i>
+      </div>
+      <h2 class="font-sans font-bold text-xl text-white uppercase tracking-wide mb-2">
+        Archive Roll is Empty
+      </h2>
+      <p class="text-neutral-400 text-xs sm:text-sm max-w-
